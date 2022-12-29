@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 [RequireComponent(typeof(Enemy))]
 public class EnemyMover : MonoBehaviour
 {  
@@ -12,7 +11,6 @@ public class EnemyMover : MonoBehaviour
     private PathFinder pathFinder;
     private GridManager gridManager;
     private List<Node> path = new List<Node>();
-    
 
     private void Awake()
     {
@@ -21,13 +19,13 @@ public class EnemyMover : MonoBehaviour
         gridManager = FindObjectOfType<GridManager>();
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         Reset2StartPos();
         RecalculatePath(true);
     }
 
-    void RecalculatePath(bool resetPath)
+    private void RecalculatePath(bool resetPath)
     {
         Vector2Int coordinates = new Vector2Int();
 
@@ -46,18 +44,18 @@ public class EnemyMover : MonoBehaviour
         StartCoroutine(MovebyPoints());
     }
 
-    void Reset2StartPos()
+    private void Reset2StartPos()
     {
         transform.position = gridManager.GetPositionFromCoordinates(pathFinder.StartCoordinates);
     }
 
-    void FinishPath()
+    private void FinishPath()
     {
         enemy.StealGold();
         gameObject.SetActive(false);
     }
 
-    IEnumerator MovebyPoints()
+    private IEnumerator MovebyPoints()
     {
         for(int i = 1; i < path.Count; i++)
         {
