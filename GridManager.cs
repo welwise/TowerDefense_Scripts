@@ -6,14 +6,16 @@ public class GridManager : MonoBehaviour
 {
     [SerializeField] private Vector2Int gridSize;
     [SerializeField] private int unityGridSize = 10;
-    public int UnityGridSize { get { return unityGridSize; } }
+
     private Dictionary<Vector2Int, Node> grid = new Dictionary<Vector2Int,Node>();
-    public Dictionary<Vector2Int, Node> Grid { get { return grid; } }
-    void Awake()
+
+    public int UnityGridSize => unityGridSize;
+    public Dictionary<Vector2Int, Node> Grid => grid
+
+    private void Awake()
     {
         PopulateGrid();
     }
-
 
     public void ResetNodes()
     {
@@ -28,9 +30,8 @@ public class GridManager : MonoBehaviour
     public Node GetNode(Vector2Int coordinates)
     {
         if (grid.ContainsKey(coordinates))
-        {
             return grid[coordinates];
-        }
+
         return null;
     }
     
@@ -51,8 +52,6 @@ public class GridManager : MonoBehaviour
         return coordinates;
     }
 
-
-
     public Vector3 GetPositionFromCoordinates(Vector2Int coordinates)
     {
         Vector3 position = new Vector3();
@@ -62,9 +61,7 @@ public class GridManager : MonoBehaviour
         return position;
     }
 
-
-
-    void PopulateGrid()
+    private void PopulateGrid()
     {
         for (int x = 0; x < gridSize.x; x++)
         {

@@ -4,66 +4,41 @@ using UnityEngine;
 
 public class PathFinder : MonoBehaviour
 {
-    
     [SerializeField] private Vector2Int startCoordinates;
-    public Vector2Int StartCoordinates { get { return startCoordinates; } }
-
     [SerializeField] private Vector2Int destinationCoordinates;
-    public Vector2Int DestinationCoordinates { get { return DestinationCoordinates; } }
+
+    [Header("Road tiles path")]
+    [SerializeField] private bool withPathFinder = true;
+    [SerializeField] private List<Tile> roadPath = new List<Tile>();
 
     private Node currentSearchNode;
     private Node startNode;
     private Node destinationNode;
     private GridManager gridManager;
 
-    private Vector2Int[] directions = {Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down};
+    private Vector2Int[] directions = { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down };
     private Dictionary<Vector2Int, Node> grid = new Dictionary<Vector2Int, Node>();
     private Dictionary<Vector2Int, Node> reached = new Dictionary<Vector2Int, Node>();
     private Queue<Node> frontier = new Queue<Node>();
 
-    [Header("Road tiles path")]
-    [SerializeField] private bool withPathFinder = true;
-    [SerializeField] private List<Tile> roadPath = new List<Tile>();
-
+    public Vector2Int StartCoordinates => startCoordinates;
+    public Vector2Int DestinationCoordinates => destinationCoordinates;
 
     private void Awake()
     {
         gridManager = FindObjectOfType<GridManager>();
-        if(gridManager != null)
-        {
-            grid = gridManager.Grid;
-            startNode = grid[startCoordinates];
-            destinationNode = grid[destinationCoordinates];
-        }
+        if (gridManager == null)
+            throw new Exception("Failed to find GridManager!");
+
+        grid = gridManager.Grid;
+        startNode = grid[startCoordinates];
+        destinationNode = grid[destinationCoordinates];
     }
 
-
-    void Start()
+    private void Start()
     {
-        StartCoroutine(Create_RoadTiles_Path());
-        GetNewPath();
-        
-    }
-
-    private IEnumerator Create_RoadTiles_Path()
-    {
-        yield return new WaitForSeconds(0.5f);
-        if (withPathFinder)
-        {
-            foreach (Node node1 in reached.Values)
-            {
-                node1.isWalkable = false;
-                //node1.isPath = false;
-            }      
-
-            foreach (Tile tile in roadPath)
-            {
-                reached[gridManager.GetCoordinatesFromPosition(tile.transform.position)].isWalkable = true;
-                reached[gridManager.GetCoordinatesFromPosition(tile.transform.position)].isPath = true;
-                
-            }
-            //NotifyReceivers();
-        }
+        StartCoroutine(CreateRoadTilesPath());
+        GetNewPath();        
     }
 
     public List<Node> GetNewPath()
@@ -71,88 +46,12 @@ public class PathFinder : MonoBehaviour
         return GetNewPath(startCoordinates);
     }
 
-
     public List<Node> GetNewPath(Vector2Int coordinates)
     {
         gridManager.ResetNodes();
         BreadthFirstSearch(coordinates);
         return BuildPath();
     }
-
-
-    void ExploreNaighbores()
-    {
-        List<Node> neighbores = new List<Node>();
-        foreach (Vector2Int direction in directions)
-        {
-            Vector2Int searchCoordinates = currentSearchNode.coordinates + direction;
-
-            if (grid.ContainsKey(searchCoordinates))
-            {
-                neighbores.Add(grid[searchCoordinates]);
-            }
-
-        }
-
-
-        foreach (Node naighbore in neighbores)
-        {
-            if(!reached.ContainsKey(naighbore.coordinates) && naighbore.isWalkable)
-            {
-                naighbore.conncetedTo = currentSearchNode;
-                reached.Add(naighbore.coordinates, naighbore);
-                frontier.Enqueue(naighbore);
-            }
-        }
-        
-    }
-
-
-    void BreadthFirstSearch(Vector2Int coordinates)
-    {
-        startNode.isWalkable = true;
-        destinationNode.isWalkable = true;
-
-        frontier.Clear();
-        reached.Clear();
-
-        bool isRunning = true;
-        frontier.Enqueue(grid[coordinates]);
-        reached.Add(coordinates, grid[coordinates]);
-
-        while(frontier.Count > 0 && isRunning)
-        {
-            currentSearchNode = frontier.Dequeue();
-            currentSearchNode.isExplored = true;
-            ExploreNaighbores();
-            if(currentSearchNode.coordinates == destinationCoordinates)
-            {
-                isRunning = false;
-            }
-        }
-
-    }
-    List<Node> BuildPath()
-    {
-        List<Node> path = new List<Node>();
-        Node currentNode = destinationNode;
-
-        path.Add(currentNode);
-        currentNode.isPath = true;
-
-        while (currentNode.conncetedTo != null)
-        {
-            currentNode = currentNode.conncetedTo;
-            path.Add(currentNode);
-            currentNode.isPath = true;
-        }
-
-        path.Reverse();
-
-        return path;
-    }
-
-
 
     public bool WillBlockPath(Vector2Int coordinates)
     {
@@ -179,4 +78,94 @@ public class PathFinder : MonoBehaviour
         BroadcastMessage("RecalculatePath", false, SendMessageOptions.DontRequireReceiver);
     }
 
+    private void ExploreNaighbores()
+    {
+        List<Node> neighbores = new List<Node>();
+        foreach (Vector2Int direction in directions)
+        {
+            Vector2Int searchCoordinates = currentSearchNode.coordinates + direction;
+
+            if (grid.ContainsKey(searchCoordinates))
+            {
+                neighbores.Add(grid[searchCoordinates]);
+            }
+
+        }
+
+        foreach (Node naighbore in neighbores)
+        {
+            if(!reached.ContainsKey(naighbore.coordinates) && naighbore.isWalkable)
+            {
+                naighbore.conncetedTo = currentSearchNode;
+                reached.Add(naighbore.coordinates, naighbore);
+                frontier.Enqueue(naighbore);
+            }
+        }
+    }
+
+    private IEnumerator CreateRoadTilesPath()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        if (withPathFinder)
+        {
+            foreach (Node node1 in reached.Values)
+            {
+                node1.isWalkable = false;
+                //node1.isPath = false;
+            }      
+
+            foreach (Tile tile in roadPath)
+            {
+                reached[gridManager.GetCoordinatesFromPosition(tile.transform.position)].isWalkable = true;
+                reached[gridManager.GetCoordinatesFromPosition(tile.transform.position)].isPath = true;
+            }
+            //NotifyReceivers();
+        }
+    }
+
+    private void BreadthFirstSearch(Vector2Int coordinates)
+    {
+        startNode.isWalkable = true;
+        destinationNode.isWalkable = true;
+
+        frontier.Clear();
+        reached.Clear();
+
+        bool isRunning = true;
+        frontier.Enqueue(grid[coordinates]);
+        reached.Add(coordinates, grid[coordinates]);
+
+        while(frontier.Count > 0 && isRunning)
+        {
+            currentSearchNode = frontier.Dequeue();
+            currentSearchNode.isExplored = true;
+            ExploreNaighbores();
+
+            if(currentSearchNode.coordinates == destinationCoordinates)
+            {
+                isRunning = false;
+            }
+        }
+    }
+
+    private List<Node> BuildPath()
+    {
+        List<Node> path = new List<Node>();
+        Node currentNode = destinationNode;
+
+        path.Add(currentNode);
+        currentNode.isPath = true;
+
+        while (currentNode.conncetedTo != null)
+        {
+            currentNode = currentNode.conncetedTo;
+            path.Add(currentNode);
+            currentNode.isPath = true;
+        }
+
+        path.Reverse();
+
+        return path;
+    }
 }

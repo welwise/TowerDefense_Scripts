@@ -4,22 +4,23 @@ using UnityEngine;
 
 public class ObjectPool : MonoBehaviour
 {
-    [SerializeField] private GameObject enemy;
+    [SerializeField] private GameObject enemy; // Лучше вместо GameObject класс Enemy, чтобы обозначить контракт. Вместо врага можно кнопку передать
     [SerializeField] [Range(0.1f, 35f)] private float spawnTime = 1f;
     [SerializeField] [Range(0,30)] private int poolSize = 5;
-    private GameObject[] pool;
+
+    private GameObject[] pool; 
 
     private void Awake()
     {
         PopulatePool();
     }
     
-    void Start()
+    private void Start()
     {
         StartCoroutine(SpawnEnemys());
     }
 
-    void PopulatePool()
+    private void PopulatePool()
     {
         pool = new GameObject[poolSize]; 
 
@@ -30,9 +31,8 @@ public class ObjectPool : MonoBehaviour
         }
     }
 
-    void EnablePoolMember()
+    private void EnablePoolMember()
     {
-        
         for (int i = 0; i < poolSize; i++)
         {
             if (!pool[i].activeInHierarchy)
@@ -43,7 +43,7 @@ public class ObjectPool : MonoBehaviour
         }
     }
 
-    IEnumerator SpawnEnemys()
+    private IEnumerator SpawnEnemys()
     {
         while (true)
         {
