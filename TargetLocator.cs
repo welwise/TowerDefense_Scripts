@@ -7,20 +7,16 @@ public class TargetLocator : MonoBehaviour
     [SerializeField] private GameObject weapon;
     [SerializeField] [Range(1f, 100f)] private float weaponRange = 10f;
     [SerializeField] private ParticleSystem projectilesParticles;
-    private Transform target;
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+    private Transform target;
+
+    private void Update()
     {
         FindClosestTarget();
         TargetAim();  
     }
 
-    void FindClosestTarget()
+    private void FindClosestTarget()
     {
         Enemy[] enemies = FindObjectsOfType<Enemy>();
         Transform closestTarget = null;
@@ -36,28 +32,29 @@ public class TargetLocator : MonoBehaviour
                 closestTarget = enemy.transform;
             }
         }
+
         target = closestTarget;
     }
 
-    void TargetAim()
+    private void TargetAim()
     {
-        if (target != null)
-        {
-            float targetDistance = Vector3.Distance(transform.position, target.position);
-            weapon.transform.LookAt(target);
-            if (targetDistance < weaponRange)
-            {
-                Attack(true);
-            }
-            else
-            {
-                Attack(false);
-            }
+        if (target == null)
+            return;
 
+        float targetDistance = Vector3.Distance(transform.position, target.position);
+        weapon.transform.LookAt(target);
+
+        if (targetDistance < weaponRange)
+        {
+            Attack(true);
+        }
+        else
+        {
+            Attack(false);
         }
     }
 
-    void Attack(bool isActive)
+    private void Attack(bool isActive)
     {
         var emissionModule = projectilesParticles.emission;
         emissionModule.enabled = isActive;
