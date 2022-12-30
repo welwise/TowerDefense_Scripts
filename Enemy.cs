@@ -9,20 +9,20 @@ public class Enemy : MonoBehaviour
 
     private Bank bank;
 
-    void Start()
+    private void Awake()
     {
         bank = FindObjectOfType<Bank>();
+        if (bank == null)
+            throw new Exception("There is no bank found on scene!");
     }
 
     public void RewardGold()
     {
-        if(bank == null) {return;}
         bank.Deposite(goldReward);
     }
 
     public void StealGold()
     {
-        if (bank == null) { return; }
         bank.Withdraw(goldPenalty);
     }
 }

@@ -6,17 +6,24 @@ public class Tower : MonoBehaviour
 {
     [SerializeField] private int towerCost = 50;
 
-    public bool CreateTower(Tower tower, Vector3 position)
+    public bool CreateTower(Vector3 position)
+    {
+        var bank = TryFindBank();
+        var isEnoughBalance = bank.CurrentBalance >= towerCost;
+        if (!isEnoughBalance)
+            return;
+
+        Instantiate(this, position, Quaternion.identity);
+        bank.Withdraw(towerCost);
+        return isEnoughBalance;
+    }
+
+    private Bank TryFindBank()
     {
         Bank bank = FindObjectOfType<Bank>();
-        if(bank == null) { return false; }
-        
-        if(bank.CurrentBalance >= towerCost)
-        {
-            Instantiate(tower, position, Quaternion.identity);
-            bank.Withdraw(towerCost);
-            return true;
-        }
-        return false;
+        if (bank == null)
+            throw new Exception("Failed to find Band!");
+
+        return bank;
     }
 }

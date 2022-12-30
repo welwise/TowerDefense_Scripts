@@ -18,11 +18,17 @@ public class CoordinateLabeler : MonoBehaviour
     {
         label = GetComponent<TextMeshPro>();
         gridManager = FindObjectOfType<GridManager>();
+        if (label == null)
+            throw new Exception("Label is null!");
+
+        if (gridManager == null)
+            throw new Exception("GridManager is null!");
+
         DisplayCoordinates();
         UpdateParentName();
     }
 
-    void Update()
+    private void Update()
     {
         if (!Application.isPlaying)
         {
@@ -35,7 +41,7 @@ public class CoordinateLabeler : MonoBehaviour
     }
     
 
-    void CheckToggleLabels()
+    private void CheckToggleLabels()
     {
         if (Input.GetKeyDown(KeyCode.C))
         {
@@ -43,13 +49,12 @@ public class CoordinateLabeler : MonoBehaviour
         }
     }
 
-    void UpdateLabelColor()
+    private void UpdateLabelColor()
     {
-        if (gridManager == null) { return; }
-
         Node node = gridManager.GetNode(coordiantes);
 
-        if (node == null) { return; }
+        if (node == null)
+            throw new Exception("Failed to get node! Node is null");
 
         if (!node.isWalkable)
         {
@@ -67,11 +72,9 @@ public class CoordinateLabeler : MonoBehaviour
         {
             label.color = defaultColor;
         }
-
-
     }
 
-    void DisplayCoordinates()
+    private void DisplayCoordinates()
     {
         if(gridManager == null) { return; }
         coordiantes.x = Mathf.RoundToInt(transform.parent.position.x / gridManager.UnityGridSize);
@@ -80,7 +83,7 @@ public class CoordinateLabeler : MonoBehaviour
         label.text = coordiantes.x + "," + coordiantes.y;
     }
 
-    void UpdateParentName()
+    private void UpdateParentName()
     {
         transform.parent.name = coordiantes.ToString();
     }
